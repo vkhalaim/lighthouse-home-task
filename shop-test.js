@@ -196,4 +196,9 @@ async function captureReport() {
   await browser.close();
 }
 
-captureReport();
+(async () => {
+  for (let i = 1; i <= iterations; i++) {
+    console.log(`\n===== ITERATION ${i} =====`);
+    await captureReport(i);
+  }
+})();
