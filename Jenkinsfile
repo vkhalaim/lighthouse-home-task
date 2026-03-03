@@ -49,35 +49,43 @@ pipeline {
             }
         }
 
-        stage('Debug Environment') {
-            steps {
-                sh '''
-                echo "WHOAMI:"
-                whoami
-                echo "ID:"
-                id
-                echo "PWD:"
-                pwd
-                echo "DOCKER INFO:"
-                docker info | head -20
-                echo "TEST WRITE:"
-                touch /var/lib/jenkins/workspace/test_from_jenkins
-                '''
-            }
-        }
-
         stage('Run Tests') {
             steps {
-                sh '''
-                echo "Running Lighthouse..."
-                echo "PWD is: $PWD"
+                echo "---------- Running tests ----------"
+                echo "Command: ${env.DOCKER_CMD}"
 
-                docker run --rm \
-                    -v "$PWD":/workspace \
-                    -w /workspace \
-                    ibombit/lighthouse-puppeteer-chrome:latest \
-                    ls -la
-                '''
+                script {
+                    try {
+                        sh '''
+                            #!/bin/bash
+                            set -e  # exit on error
+
+                            mkdir -p /tmp/lh-workspace
+                            cp -r . /tmp/lh-workspace/
+                            chmod -R 777 /tmp/lh-workspace  # allow container to write
+
+                            DATE=$(date +%F-%H-%M-%S)
+                            OUTPUT_FOLDER="testResults/shop-test.js/${DATE}"
+
+                            docker run --rm \
+                                -v /tmp/lh-workspace:/lighthouse \
+                                -w /lighthouse \
+                                ibombit/lighthouse-puppeteer-chrome:latest \
+                                node shop-test.js \
+                                --outputFolder "${OUTPUT_FOLDER}" \
+                                -n "${ITERATIONS}"
+
+                            # Copy reports back (adjust path if script creates nested dirs)
+                            mkdir -p testResults
+                            cp -r /tmp/lh-workspace/testResults/* testResults/ || true
+                            rm -rf /tmp/lh-workspace
+                        '''
+                    } catch (Exception err) {
+                        echo "Test execution failed: ${err}"
+                        currentBuild.result = 'UNSTABLE'  // or 'FAILURE'
+                        error("Stopping due to test failure")
+                    }
+                }
             }
         }
 
