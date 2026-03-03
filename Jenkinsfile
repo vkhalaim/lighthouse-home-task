@@ -43,20 +43,20 @@ pipeline {
         stage('Run Lighthouse') {
             steps {
                 script {
-                    def DOCKER_CMD = """
-                    docker run --rm \
-                      -v ${pwd()}:/workspace \
-                      -w /workspace \
-                      ibombit/lighthouse-puppeteer-chrome:latest \
-                      node UI_scripts/${params.SCRIPT_TO_RUN}.js ${params.ITERATIONS}
-                    """
+		    def DOCKER_CMD = """
+		    docker run --rm \
+		      -v \$WORKSPACE:/workspace \
+		      -w /workspace \
+		      ibombit/lighthouse-puppeteer-chrome:latest \
+		      node UI_scripts/${params.SCRIPT_TO_RUN}.js ${params.ITERATIONS}
+		    """
 
-                    try {
-                        sh DOCKER_CMD
-                    } catch (err) {
-                        error("Lighthouse execution failed: ${err}")
-                    }
-                }
+		    try {
+			sh DOCKER_CMD
+		    } catch (err) {
+			error("Lighthouse execution failed: ${err}")
+		    }
+		}
             }
         }
 
