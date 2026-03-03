@@ -49,6 +49,23 @@ pipeline {
             }
         }
 
+        stage('Debug Environment') {
+            steps {
+                sh '''
+                echo "WHOAMI:"
+                whoami
+                echo "ID:"
+                id
+                echo "PWD:"
+                pwd
+                echo "DOCKER INFO:"
+                docker info | head -20
+                echo "TEST WRITE:"
+                touch /var/lib/jenkins/workspace/test_from_jenkins
+                '''
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 sh '''
@@ -61,7 +78,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Publish Report') {
             steps {
                 archiveArtifacts(
