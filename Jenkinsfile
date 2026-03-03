@@ -40,25 +40,21 @@ pipeline {
             }
         }
 
-        stage('Run Lighthouse') {
-            steps {
-                script {
-		    def DOCKER_CMD = """
-		    docker run --rm \
-		      -v \$WORKSPACE:/workspace \
-		      -w /workspace \
-		      ibombit/lighthouse-puppeteer-chrome:latest \
-		      node UI_scripts/${params.SCRIPT_TO_RUN}.js ${params.ITERATIONS}
-		    """
+	stage('Run Lighthouse') {
+	    steps {
+		sh '''
+		echo "Current directory:"
+		pwd
+		ls -la
 
-		    try {
-			sh DOCKER_CMD
-		    } catch (err) {
-			error("Lighthouse execution failed: ${err}")
-		    }
-		}
-            }
-        }
+		docker run --rm \
+		  -v "$(pwd)":/workspace \
+		  -w /workspace \
+		  ibombit/lighthouse-puppeteer-chrome:latest \
+		  node UI_scripts/${SCRIPT_TO_RUN}.js ${ITERATIONS}
+		'''
+	    }
+	}
 
         stage('Archive Results') {
             steps {
