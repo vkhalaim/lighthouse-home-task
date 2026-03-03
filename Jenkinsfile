@@ -4,16 +4,9 @@ pipeline {
 
     options {
         disableConcurrentBuilds()
-        buildDiscarder(logRotator(daysToKeepStr: '25', numToKeepStr: '25'))
     }
 
     parameters {
-        choice(
-            name: 'SCRIPT_TO_RUN',
-            choices: ['Client_UI_test', 'Coach_UI_test'],
-            description: 'Lighthouse script name'
-        )
-
         choice(
             name: 'ITERATIONS',
             choices: ['3', '5', '10'],
@@ -30,57 +23,28 @@ pipeline {
             }
         }
 
-        stage('Prepare') {
+        stage('Run Lighthouse') {
             steps {
-                script {
-                    DATE = new Date().format("yyyy-MM-dd-HH-mm-ss")
-                    RESULTS_DIR = "testResults/${params.SCRIPT_TO_RUN}/${DATE}"
-                    sh "mkdir -p ${RESULTS_DIR}"
-                }
+                sh '''
+                echo "Running Lighthouse..."
+                pwd
+                ls -la
+
+                docker run --rm \
+                  -v "$(pwd)":/workspace \
+                  -w /workspace \
+                  ibombit/lighthouse-puppeteer-chrome:latest \
+                  node shop-test.js ${ITERATIONS}
+                '''
             }
         }
 
-	stage('Run Lighthouse') {
-	    steps {
-		sh '''
-		echo "Current directory:"
-		pwd
-		ls -la
-
-		docker run --rm \
-		  -v "$(pwd)":/workspace \
-		  -w /workspace \
-		  ibombit/lighthouse-puppeteer-chrome:latest \
-		  node UI_scripts/${SCRIPT_TO_RUN}.js ${ITERATIONS}
-		'''
-	    }
-	}
-
-        stage('Archive Results') {
+        stage('Archive Reports') {
             steps {
-                archiveArtifacts allowEmptyArchive: true,
-                                 artifacts: '**/*.report.html',
-                                 onlyIfSuccessful: false
+                archiveArtifacts artifacts: '*.report.html',
+                                 allowEmptyArchive: true
             }
         }
-
-        stage('Publish HTML Reports') {
-	    steps {
-		script {
-		    def iterations = params.ITERATIONS.toInteger()
-		    for (int i = 1; i <= iterations; i++) {
-		        publishHTML([
-		            allowMissing: true,
-		            alwaysLinkToLastBuild: false,
-		            keepAll: true,
-		            reportDir: '.',
-		            reportFiles: "user-flow-${i}.report.html",
-		            reportName: "Lighthouse Iteration ${i}"
-		        ])
-		    }
-		}
-	    }
-	}
     }
 
     post {
