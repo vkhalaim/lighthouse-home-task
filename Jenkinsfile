@@ -56,11 +56,27 @@ pipeline {
 
                 script {
                     try {
-                        sh env.DOCKER_CMD
+                        sh '''
+                            mkdir -p /tmp/lh-workspace
+                            cp -r . /tmp/lh-workspace/
+                            chmod -R 777 /tmp/lh-workspace   # ensure container can write reports if needed
+
+                            docker run --rm \
+                                -v /tmp/lh-workspace:/lighthouse \
+                                -w /lighthouse \
+                                ibombit/lighthouse-puppeteer-chrome:latest \
+                                node shop-test.js \
+                                --outputFolder testResults/shop-test.js/$(date +%F-%H-%M-%S) \
+                                -n ${params.ITERATIONS}
+
+                            # Copy reports back to real workspace so archive/publish works
+                            cp -r /tmp/lh-workspace/testResults ./ || true
+                            rm -rf /tmp/lh-workspace
+                        '''
                     } catch (Exception err) {
                         echo "Test execution failed: ${err}"
-                        currentBuild.result = 'UNSTABLE'   // or 'FAILURE' — your choice
-                        error("Stopping due to test failure")   // fail the build
+                        currentBuild.result = 'UNSTABLE'
+                        error("Stopping due to test failure")
                     }
                 }
             }
