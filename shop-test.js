@@ -10,6 +10,9 @@
  * 7. Fill form & submit
  */
 
+// iterations from command argument
+const iterations = parseInt(process.argv[2]) || 3;
+
 const fs = require('fs');
 const puppeteer = require('puppeteer');
 const lighthouse = require('lighthouse/lighthouse-core/fraggle-rock/api.js');
@@ -185,7 +188,7 @@ async function captureReport() {
   // ----------------------------------------------------
   // REPORTS
   // ----------------------------------------------------
-    const reportPath = __dirname + '/user-flow.report.html';
+    const reportPath = __dirname + `/user-flow-${iteration}.report.html`;
 
     const report = await flow.generateReport();
     fs.writeFileSync(reportPath, report);
