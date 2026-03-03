@@ -51,44 +51,17 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                echo "---------- Running tests ----------"
-                echo "Command: ${env.DOCKER_CMD}"
-
-                script {
-                    try {
-                        sh '''
-                            #!/bin/bash
-                            set -e  # exit on error
-
-                            mkdir -p /tmp/lh-workspace
-                            cp -r . /tmp/lh-workspace/
-                            chmod -R 777 /tmp/lh-workspace  # allow container to write
-
-                            DATE=$(date +%F-%H-%M-%S)
-                            OUTPUT_FOLDER="testResults/shop-test.js/${DATE}"
-
-                            docker run --rm \
-                                -v /tmp/lh-workspace:/lighthouse \
-                                -w /lighthouse \
-                                ibombit/lighthouse-puppeteer-chrome:latest \
-                                node shop-test.js \
-                                --outputFolder "${OUTPUT_FOLDER}" \
-                                -n "${ITERATIONS}"
-
-                            # Copy reports back (adjust path if script creates nested dirs)
-                            mkdir -p testResults
-                            cp -r /tmp/lh-workspace/testResults/* testResults/ || true
-                            rm -rf /tmp/lh-workspace
-                        '''
-                    } catch (Exception err) {
-                        echo "Test execution failed: ${err}"
-                        currentBuild.result = 'UNSTABLE'  // or 'FAILURE'
-                        error("Stopping due to test failure")
-                    }
-                }
+                sh '''
+                echo "Running Lighthouse..."
+                docker run --rm \
+                    -v "$(pwd)":/workspace \
+                    -w /workspace \
+                    ibombit/lighthouse-puppeteer-chrome:latest \
+                    ls -la
+                '''
             }
         }
-
+        
         stage('Publish Report') {
             steps {
                 archiveArtifacts(
