@@ -24,20 +24,17 @@ pipeline {
         }
 
         stage('Run Lighthouse') {
-            steps {
-                sh '''
-                echo "Running Lighthouse..."
-                pwd
-                ls -la
-
-                docker run --rm \
-                  -v "$(pwd)":/workspace \
-                  -w /workspace \
-                  ibombit/lighthouse-puppeteer-chrome:latest \
-                  node shop-test.js ${ITERATIONS}
-                '''
-            }
-        }
+	    steps {
+		sh '''
+		echo "Running Lighthouse..."
+		docker run --rm \
+		  -v "$PWD":/workspace \
+		  -w /workspace \
+		  ibombit/lighthouse-puppeteer-chrome:latest \
+		  node shop-test.js ${ITERATIONS}
+		'''
+	    }
+	}
 
         stage('Archive Reports') {
             steps {
