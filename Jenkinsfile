@@ -70,8 +70,10 @@ pipeline {
             steps {
                 sh '''
                 echo "Running Lighthouse..."
+                echo "PWD is: $PWD"
+
                 docker run --rm \
-                    -v "$(pwd)":/workspace \
+                    -v "$PWD":/workspace \
                     -w /workspace \
                     ibombit/lighthouse-puppeteer-chrome:latest \
                     ls -la
