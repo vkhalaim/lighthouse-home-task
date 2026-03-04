@@ -47,7 +47,7 @@ const waitTillHTMLRendered = async (page, timeout = 30000) => {
   }
 };
 
-async function captureReport() {
+async function captureReport(iteration) {
 
   const browser = await puppeteer.launch({
     headless: true,
