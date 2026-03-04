@@ -27,7 +27,7 @@ pipeline {
                 mkdir -p $RESULTS
 
                 CONTAINER=$(docker create \
-                    ibombit/lighthouse-puppeteer-chrome:9.6.8 \
+                    femtopixel/google-lighthouse-puppeteer:v9.6.8-v19.2.0-1.3.3 \
                     sleep infinity)
 
                 docker cp . $CONTAINER:/lighthouse
