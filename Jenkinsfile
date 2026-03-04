@@ -1,6 +1,11 @@
 pipeline {
 
-    agent any
+    agent {
+        docker {
+            image 'ibombit/lighthouse-puppeteer-chrome:latest'
+            args '-u root'
+        }
+    }
 
     parameters {
         choice(
@@ -28,26 +33,22 @@ pipeline {
             steps {
                 sh """
                 DATE=\$(date +%F-%H-%M-%S)
-                RESULTS=testResults/\$DATE
+                RESULTS=${RESULTS_ROOT}/\$DATE
 
                 mkdir -p \$RESULTS
 
-                docker run --rm \
-                  -v \$(pwd):/lighthouse \
-                  -w /lighthouse \
-                  ibombit/lighthouse-puppeteer-chrome:latest \
-                  node ${SCRIPT} \
+                node ${SCRIPT} \
                   --outputFolder \$RESULTS \
                   -n ${params.ITERATIONS}
                 """
             }
-
-            post {
-                always {
-                    archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
-                }
-            }
         }
 
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
+        }
     }
 }
