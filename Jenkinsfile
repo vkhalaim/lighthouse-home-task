@@ -1,11 +1,6 @@
 pipeline {
 
-    agent {
-        docker {
-            image 'ibombit/lighthouse-puppeteer-chrome:latest'
-            args '-u root'
-        }
-    }
+    agent any
 
     parameters {
         choice(
@@ -13,11 +8,6 @@ pipeline {
             choices: ['1','3','5','10'],
             description: 'Number of Lighthouse loops'
         )
-    }
-
-    environment {
-        SCRIPT = 'shop-test.js'
-        RESULTS_ROOT = 'testResults'
     }
 
     stages {
@@ -31,19 +21,26 @@ pipeline {
 
         stage('Run Lighthouse') {
             steps {
-                sh """
-                DATE=\$(date +%F-%H-%M-%S)
-                RESULTS=${RESULTS_ROOT}/\$DATE
+                sh '''
+                DATE=$(date +%F-%H-%M-%S)
+                RESULTS=testResults/$DATE
+                mkdir -p $RESULTS
 
-                mkdir -p \$RESULTS
+                CONTAINER=$(docker create ibombit/lighthouse-puppeteer-chrome:latest)
 
-                node ${SCRIPT} \
-                  --outputFolder \$RESULTS \
-                  -n ${params.ITERATIONS}
-                """
+                docker cp . $CONTAINER:/lighthouse
+
+                docker start -a $CONTAINER \
+                    node /lighthouse/shop-test.js \
+                    --outputFolder /lighthouse/$RESULTS \
+                    -n ${ITERATIONS}
+
+                docker cp $CONTAINER:/lighthouse/testResults ./testResults
+
+                docker rm $CONTAINER
+                '''
             }
         }
-
     }
 
     post {
