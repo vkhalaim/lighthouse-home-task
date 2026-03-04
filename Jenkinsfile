@@ -26,7 +26,9 @@ pipeline {
                 RESULTS=testResults/$DATE
                 mkdir -p $RESULTS
 
-                CONTAINER=$(docker create ibombit/lighthouse-puppeteer-chrome:latest)
+                CONTAINER=$(docker create \
+                    ibombit/lighthouse-puppeteer-chrome:latest \
+                    sleep infinity)
 
                 docker cp . $CONTAINER:/lighthouse
 
