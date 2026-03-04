@@ -24,30 +24,36 @@ pipeline {
             }
         }
 
-        stage('Run Lighthouse') {
-            steps {
-                sh """
-                DATE=\$(date +%F-%H-%M-%S)
-                RESULTS=${RESULTS_ROOT}/\$DATE
+	stage('Run Lighthouse') {
+	    steps {
+		sh """
+		DATE=\$(date +%F-%H-%M-%S)
+		RESULTS=testResults/\$DATE
 
-                mkdir -p \$RESULTS
+		mkdir -p \$RESULTS
 
-                docker run --rm \
-                  -v \$PWD:/lighthouse \
-                  -w /lighthouse \
-                  ibombit/lighthouse-puppeteer-chrome:latest \
-                  node ${SCRIPT} \
-                  --outputFolder \$RESULTS \
-                  -n ${params.ITERATIONS}
-                """
-            }
+		mkdir -p /tmp/lh-workspace
+		cp -r . /tmp/lh-workspace
 
-            post {
-                always {
-                    archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
-                }
-            }
-        }
+		docker run --rm \
+		  -v /tmp/lh-workspace:/lighthouse \
+		  -w /lighthouse \
+		  ibombit/lighthouse-puppeteer-chrome:latest \
+		  node ${SCRIPT} \
+		  --outputFolder \$RESULTS \
+		  -n ${params.ITERATIONS}
+
+		cp -r /tmp/lh-workspace/testResults/* testResults/ || true
+		rm -rf /tmp/lh-workspace
+		"""
+	    }
+
+	    post {
+		always {
+		    archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
+		}
+	    }
+	}
 
     }
 }
