@@ -15,6 +15,7 @@ let outputFolder = process.argv[1];
 const iterations = parseInt(process.argv[2]) || 3;
 
 const fs = require('fs');
+const path = require('path');
 const puppeteer = require('puppeteer');
 const lighthouse = require('lighthouse/lighthouse-core/fraggle-rock/api.js');
 
