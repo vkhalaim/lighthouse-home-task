@@ -37,7 +37,7 @@ pipeline {
                 docker start $CONTAINER
 
                 # Install dependencies from package.json
-                docker exec $CONTAINER sh -c "
+                docker exec -u root $CONTAINER sh -c "
                 cd /lighthouse &&
                 npm install
                 "
