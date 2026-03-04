@@ -30,17 +30,20 @@ pipeline {
 
                 docker cp . $CONTAINER:/lighthouse
 
-                docker start -a $CONTAINER \
+                docker start $CONTAINER
+
+                docker exec $CONTAINER \
                     node /lighthouse/shop-test.js \
                     --outputFolder /lighthouse/$RESULTS \
                     -n ${ITERATIONS}
 
                 docker cp $CONTAINER:/lighthouse/testResults ./testResults
 
-                docker rm $CONTAINER
+                docker rm -f $CONTAINER
                 '''
             }
         }
+
     }
 
     post {
