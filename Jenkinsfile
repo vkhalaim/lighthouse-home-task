@@ -19,49 +19,37 @@ pipeline {
             }
         }
 
-        stage('Run Lighthouse') {
+        stage('Prepare results folder') {
             steps {
                 sh '''
-                DATE=$(date +%F-%H-%M-%S)
-                RESULTS=testResults/$DATE
-                mkdir -p $RESULTS
-
-                CONTAINER=$(docker create \
-                    femtopixel/google-lighthouse-puppeteer:v9.6.8-v19.2.0-1.3.3 \
-                    sleep infinity)
-
-                # Copy project into container
-                docker cp . $CONTAINER:/lighthouse
-
-                # Start container
-                docker start $CONTAINER
-
-                # Install dependencies from package.json
-                docker exec -u root $CONTAINER sh -c "
-                cd /lighthouse &&
-                npm install
-                "
-
-                # Run Lighthouse script
-                docker exec $CONTAINER CHROME_PATH=/usr/bin/chromium \
-                    node /lighthouse/shop-test.cjs \
-                    --outputFolder /lighthouse/$RESULTS \
-                    -n ${ITERATIONS}
-
-                # Copy results back to Jenkins workspace
-                docker cp $CONTAINER:/lighthouse/testResults ./testResults
-
-                # Remove container
-                docker rm -f $CONTAINER
+                mkdir -p $WORKSPACE/testResults
                 '''
             }
         }
 
+        stage('Run Lighthouse Test') {
+            steps {
+                sh """
+                docker run --rm \
+                -v ${WORKSPACE}/testResults:/lighthouse/testResults \
+                -v ${WORKSPACE}:/lighthouse \
+                -w /lighthouse \
+                ibombit/lighthouse-puppeteer-chrome:latest \
+                node shop-test.cjs --outputFolder /lighthouse/testResults -n ${params.ITERATIONS}
+                """
+            }
+        }
+
+        stage('Archive Lighthouse Results') {
+            steps {
+                archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
+            }
+        }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
+            echo "Pipeline finished."
         }
     }
 }
