@@ -189,7 +189,7 @@ async function captureReport(iteration) {
   // ----------------------------------------------------
   // REPORTS
   // ----------------------------------------------------
-    const reportPath = __dirname + `${outputFolder}/user-flow-${iteration}.report.html`;
+    const reportPath = `${outputFolder}/user-flow-${iteration}.report.html`;
 
     const report = await flow.generateReport();
     fs.writeFileSync(reportPath, report);
