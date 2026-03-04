@@ -11,8 +11,20 @@
  */
 
 // iterations and out folder from command argument
-let outputFolder = process.argv[1];
-const iterations = parseInt(process.argv[2]) || 3;
+const args = process.argv.slice(2);
+
+let outputFolder = "testResults";
+let iterations = 3;
+
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === "--outputFolder") {
+    outputFolder = args[i + 1];
+  }
+
+  if (args[i] === "-n") {
+    iterations = parseInt(args[i + 1], 10);
+  }
+}
 
 const fs = require('fs');
 const path = require('path');
