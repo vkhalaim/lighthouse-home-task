@@ -30,17 +30,28 @@ pipeline {
                     femtopixel/google-lighthouse-puppeteer:v9.6.8-v19.2.0-1.3.3 \
                     sleep infinity)
 
+                # Copy project into container
                 docker cp . $CONTAINER:/lighthouse
 
+                # Start container
                 docker start $CONTAINER
 
+                # Install dependencies from package.json
+                docker exec $CONTAINER sh -c "
+                cd /lighthouse &&
+                npm install
+                "
+
+                # Run Lighthouse script
                 docker exec $CONTAINER \
                     node /lighthouse/shop-test.cjs \
                     --outputFolder /lighthouse/$RESULTS \
                     -n ${ITERATIONS}
 
+                # Copy results back to Jenkins workspace
                 docker cp $CONTAINER:/lighthouse/testResults ./testResults
 
+                # Remove container
                 docker rm -f $CONTAINER
                 '''
             }
