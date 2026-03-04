@@ -165,8 +165,10 @@ async function captureReport(iteration) {
   // 5. Open Cart
   // ----------------------------------------------------
   await flow.startTimespan({ stepName: 'Open Cart' });
-  await page.click(`a[href="${CartPage}"]`);
-  await waitTillHTMLRendered(page);
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: "networkidle0" }),
+    page.click(`a[href="${CartPage}"]`)
+  ]);
   await flow.endTimespan();
   console.log('Cart opened');
 
