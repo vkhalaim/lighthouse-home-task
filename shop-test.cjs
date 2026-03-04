@@ -10,7 +10,8 @@
  * 7. Fill form & submit
  */
 
-// iterations from command argument
+// iterations and out folder from command argument
+let outputFolder = process.argv[1];
 const iterations = parseInt(process.argv[2]) || 3;
 
 const fs = require('fs');
