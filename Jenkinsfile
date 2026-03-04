@@ -33,7 +33,7 @@ pipeline {
 		mkdir -p \$RESULTS
 
 		mkdir -p /tmp/lh-workspace
-		cp -r . /tmp/lh-workspace
+		cp -r ./* /tmp/lh-workspace/
 
 		docker run --rm \
 		  -v /tmp/lh-workspace:/lighthouse \
