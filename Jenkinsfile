@@ -39,7 +39,7 @@ pipeline {
                 # Install dependencies from package.json
                 docker exec -u root $CONTAINER sh -c "
                 cd /lighthouse &&
-                npm install &&
+                npm ci &&
                 npx puppeteer browsers install chrome
                 "
 
