@@ -35,7 +35,7 @@ pipeline {
                 docker start $CONTAINER
 
                 docker exec $CONTAINER \
-                    node /lighthouse/shop-test.js \
+                    node /lighthouse/shop-test.cjs \
                     --outputFolder /lighthouse/$RESULTS \
                     -n ${ITERATIONS}
 
