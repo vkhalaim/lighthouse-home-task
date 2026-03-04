@@ -42,6 +42,9 @@ pipeline {
                 npm install
                 "
 
+                # DEBUG
+                docker exec $CONTAINER sh -c "which google-chrome || which chromium || which chromium-browser"
+
                 # Run Lighthouse script
                 docker exec $CONTAINER \
                     node /lighthouse/shop-test.cjs \
