@@ -41,6 +41,19 @@ pipeline {
                 archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
             }
         }
+
+        stage('Publish HTML Report') {
+            steps {
+                publishHTML([
+                    reportName: 'Lighthouse Reports',
+                    reportDir: 'testResults',
+                    reportFiles: '*.html',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: true
+                ])
+            }
+        }
     }
 
     post {
