@@ -9,6 +9,10 @@ pipeline {
         )
     }
 
+    environment {
+        REPORT_DIR = "testResults/${BUILD_NUMBER}"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -27,10 +31,10 @@ pipeline {
         stage('Run Lighthouse Test') {
             steps {
                 sh """
-                mkdir -p testResults
+                mkdir -p ${REPORT_DIR}
 
                 node shop-test.cjs \
-                --outputFolder ./testResults \
+                --outputFolder ${REPORT_DIR} \
                 -n ${params.ITERATIONS}
                 """
             }
@@ -38,7 +42,7 @@ pipeline {
 
         stage('Archive Results') {
             steps {
-                archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
+                archiveArtifacts artifacts: "${REPORT_DIR}/**", allowEmptyArchive: true
             }
         }
 
@@ -46,7 +50,7 @@ pipeline {
             steps {
                 publishHTML([
                     reportName: 'Lighthouse Reports',
-                    reportDir: 'testResults',
+                    reportDir: "${REPORT_DIR}",
                     reportFiles: '*.html',
                     keepAll: true,
                     alwaysLinkToLastBuild: true,
