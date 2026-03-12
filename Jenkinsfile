@@ -20,15 +20,15 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh '''
-                npm install
-                '''
+                sh 'npm install'
             }
         }
 
         stage('Run Lighthouse Test') {
             steps {
                 sh """
+                mkdir -p testResults
+
                 node shop-test.cjs \
                 --outputFolder ./testResults \
                 -n ${params.ITERATIONS}
@@ -41,7 +41,6 @@ pipeline {
                 archiveArtifacts artifacts: 'testResults/**', allowEmptyArchive: true
             }
         }
-
     }
 
     post {
