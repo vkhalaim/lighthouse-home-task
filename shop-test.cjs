@@ -177,8 +177,10 @@ async function captureReport(iteration) {
   // ----------------------------------------------------
   await flow.startTimespan({ stepName: 'Open Checkout' });
   await page.waitForSelector(placeOrderBtn);
-  await page.click(placeOrderBtn);
-  await waitTillHTMLRendered(page);
+  await Promise.all([
+    page.waitForNavigation({ waitUntil: 'networkidle0' }),
+    page.click(placeOrderBtn)
+  ]);
   await flow.endTimespan();
   console.log('Checkout opened');
 
